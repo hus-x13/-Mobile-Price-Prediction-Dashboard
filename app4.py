@@ -9,7 +9,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import numpy as np
-import os
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -20,27 +19,21 @@ st.set_page_config(
 st.title("📱 Mobile Price Prediction Dashboard")
 st.markdown("Predict mobile prices using Random Forest regression")
 
-# --- Load Data ---
+# --- File Upload ---
+uploaded_file = st.file_uploader("📂 Upload your mobile prices CSV", type=["csv"])
 
-
-@st.cache_data
-def load_data(file_path):
-    if not os.path.exists(file_path):
-        st.error(f"CSV file not found: {file_path}")
-        return pd.DataFrame()
-    try:
-        df = pd.read_csv(file_path)
-        df.columns = df.columns.str.strip()  # Clean column names
-        return df
-    except Exception as e:
-        st.error(f"Error loading CSV: {e}")
-        return pd.DataFrame()
-
-
-df = load_data(
-    r"/Users/hussseinsabbagh/Desktop/PROGRAMING/Machine learning/mobile_prices_2023 2.csv")
-if df.empty:
+if uploaded_file is None:
+    st.warning("Please upload a CSV file to continue.")
     st.stop()
+
+# --- Load Data ---
+@st.cache_data
+def load_data(file):
+    df = pd.read_csv(file)
+    df.columns = df.columns.str.strip()  # Clean column names
+    return df
+
+df = load_data(uploaded_file)
 
 # --- Detect Price Column ---
 price_col_candidates = [col for col in df.columns if 'price' in col.lower()]
